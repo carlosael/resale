@@ -8,9 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="Migrations\**" />
+    <Compile Remove="ResaleApi.Tests\**" />
     <Content Remove="Migrations\**" />
+    <Content Remove="ResaleApi.Tests\**" />
     <EmbeddedResource Remove="Migrations\**" />
+    <EmbeddedResource Remove="ResaleApi.Tests\**" />
     <None Remove="Migrations\**" />
+    <None Remove="ResaleApi.Tests\**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -97,3 +97,28 @@ The API enforces the following business rules:
    - Reseller ownership validation for orders.
 
 These rules are automatically validated during Create and Update operations.
+
+### Testing the Application
+
+The project includes comprehensive unit tests for critical business logic and integrations.
+
+1. **Run Tests**
+
+   - Navigate to the root folder and run:
+
+   ```sh
+   dotnet test
+   ```
+
+2. **Test Coverage**
+
+   The tests cover:
+
+   - **BreweryOrderService**: Order consolidation logic and API integration
+   - **BreweryApiService**: External API communication with retry mechanisms
+   - **ResellerService**: CNPJ validation and business rules
+   - **CustomerOrderService**: Order creation and status management
+
+3. **Test Output**
+
+   - You should see a summary of test results with all tests passing.
