@@ -1,250 +1,99 @@
 # Resale API
 
-API para gerenciamento de revendas e pedidos de bebidas, desenvolvida para integração com a API da Brewery.
+## Description
 
-## Funcionalidades
+This project is a backend API for managing beverage resale operations, implemented using .NET 8.0. It provides endpoints for managing products, resellers, customer orders, and brewery orders. The system includes automatic order consolidation and integration with external brewery APIs.
 
-### 1. Cadastro de Revendas (CRUD Completo)
+## Features
 
-- **CNPJ**: Obrigatório e validado
-- **Razão Social**: Obrigatória
-- **Nome Fantasia**: Obrigatório
-- **Email**: Obrigatório e validado
-- **Telefones**: Opcional, múltiplos telefones com validação
-- **Contatos**: Obrigatório, múltiplos contatos com um principal
-- **Endereços de Entrega**: Obrigatório, múltiplos endereços
+- CRUD operations for products, resellers, and orders.
+- Automatic order consolidation with minimum quantity validation.
+- External brewery API integration with retry mechanism.
+- Order status tracking and management.
+- Comprehensive pagination for all listing endpoints.
+- Swagger/OpenAPI documentation.
 
-### 2. Recebimento de Pedidos dos Clientes
+## Getting Started
 
-- Identificação do cliente
-- Lista de produtos com quantidades
-- Sem regra de pedido mínimo na revenda
-- Resposta com identificação do pedido e lista de itens
+### Prerequisites
 
-### 3. Integração com API da Brewery
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [SQL Server](https://www.microsoft.com/pt-br/sql-server/sql-server-downloads) (Ensure you have a running instance of SQL Server. Update the connection string in appsettings.json as needed.)
+- [Git](https://git-scm.com/downloads) (Clone the repository using Git.)
 
-- Consolidação de pedidos da revenda
-- **Regra de pedido mínimo**: 1000 unidades
-- Tratamento de instabilidade da API com retry automático
-- Mock service para desenvolvimento/testes
+### Installation
 
-## Tecnologias Utilizadas
+1. **Clone the Repository**
 
-- **.NET 8.0**
-- **Entity Framework Core** com SQL Server
-- **Swagger/OpenAPI** para documentação
-- **FluentValidation** para validações
-- **Polly** para políticas de retry
-- **Serilog** para logging estruturado
+   ```sh
+   git clone https://github.com/yourusername/resale-api.git
+   cd resale-api
+   ```
 
-## Configuração
+2. **Update appsettings.json**
 
-### Pré-requisitos
+   - Update the appsettings.json file with your SQL Server connection string:
 
-- .NET 8.0 SDK
-- SQL Server (LocalDB ou instância completa)
-- Visual Studio 2022 ou VS Code
+   ```json
+   {
+     "ConnectionStrings": {
+       "DefaultConnection": "Server=your_server_name;Database=ResaleDb;Trusted_Connection=True;MultipleActiveResultSets=true"
+     }
+   }
+   ```
 
-### Configuração do Banco de Dados
+3. **Apply Migrations**
 
-1. Atualize a connection string no `appsettings.json`:
+   - Run the following commands to apply the database migrations:
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=resale-api;Trusted_Connection=true;TrustServerCertificate=true;"
-  }
-}
-```
+   ```sh
+   dotnet ef database update
+   ```
 
-2. Execute as migrations:
+4. **Running the Application**
 
-```bash
-dotnet ef migrations add InitialCreate
-dotnet ef database update
-```
+   - Start the API:
+     Run the application using the following command:
 
-### Executando a Aplicação
+   ```sh
+   dotnet run
+   ```
 
-```bash
-dotnet run
-```
+   - Swagger UI:
+     Once the application is running, you can access the API documentation at:
 
-A API estará disponível em:
+   ```sh
+   http://localhost:5001
+   ```
 
-- **HTTPS**: https://localhost:7001
-- **HTTP**: http://localhost:5001
-- **Swagger**: https://localhost:7001/swagger
+### API Endpoints
 
-## Endpoints Principais
+The API provides the following main endpoints:
 
-### Revendas
+- **Products**: `/api/products` - Manage beverage catalog
+- **Resellers**: `/api/resellers` - Manage reseller information
+- **Customer Orders**: `/api/customerorders` - Handle customer orders
+- **Brewery Orders**: `/api/breweryorders` - Manage consolidated brewery orders
 
-- `POST /api/resellers` - Criar revenda
-- `GET /api/resellers` - Listar revendas (paginado)
-- `GET /api/resellers/{id}` - Buscar revenda por ID
-- `GET /api/resellers/cnpj/{cnpj}` - Buscar revenda por CNPJ
-- `PUT /api/resellers/{id}` - Atualizar revenda
-- `DELETE /api/resellers/{id}` - Desativar revenda
+### Business Rules
 
-### Pedidos dos Clientes
+The API enforces the following business rules:
 
-- `POST /api/customerorders` - Criar pedido do cliente
-- `GET /api/customerorders` - Listar pedidos (paginado)
-- `GET /api/customerorders/reseller/{id}` - Pedidos por revenda
-- `GET /api/customerorders/reseller/{id}/pending` - Pedidos pendentes
-- `PATCH /api/customerorders/{id}/status` - Atualizar status
-- `POST /api/customerorders/{id}/cancel` - Cancelar pedido
+1. **Order Consolidation**:
 
-### Pedidos para Brewery
+   - Minimum order quantity: 1,000 units per brewery order.
+   - Automatic consolidation of multiple customer orders by product.
+   - Orders are marked as "Consolidated" once processed.
 
-- `POST /api/breweryorders` - Criar e enviar pedido para Brewery
-- `GET /api/breweryorders` - Listar pedidos Brewery (paginado)
-- `GET /api/breweryorders/pending` - Pedidos pendentes
-- `GET /api/breweryorders/failed` - Pedidos com falha
-- `POST /api/breweryorders/{id}/retry` - Retentar envio
-- `POST /api/breweryorders/process-pending` - Processar pendentes
+2. **Brewery Integration**:
 
-### Produtos
+   - Automatic retry mechanism with exponential backoff.
+   - Order status tracking: Pending, Failed, Confirmed.
+   - Mock service available for development and testing.
 
-- `GET /api/products` - Listar produtos ativos
-- `GET /api/products/{id}` - Buscar produto por ID
-- `GET /api/products/brand/{brand}` - Produtos por marca
-- `GET /api/products/category/{category}` - Produtos por categoria
-- `POST /api/products` - Criar produto (para demonstração)
+3. **Data Validation**:
+   - CNPJ validation for resellers.
+   - Active product validation in orders.
+   - Reseller ownership validation for orders.
 
-## Validações Implementadas
-
-### CNPJ
-
-- Formato válido (14 dígitos)
-- Dígitos verificadores corretos
-- Unicidade no sistema
-
-### Email
-
-- Formato válido
-- Unicidade no sistema
-
-### Telefone
-
-- Formato brasileiro válido
-- Suporte a celular e fixo
-
-### Regras de Negócio
-
-- **Contatos**: Pelo menos um contato principal por revenda
-- **Endereços**: Pelo menos um endereço padrão por revenda
-- **Pedidos Brewery**: Mínimo de 1000 unidades consolidadas
-- **Consolidação**: Produtos iguais são somados automaticamente
-
-## Tratamento de Falhas
-
-### API da Brewery
-
-- **Retry Policy**: 3 tentativas com backoff exponencial
-- **Timeout**: 30 seconds configurável
-- **Mock Service**: Para desenvolvimento e testes
-- **Logging**: Detalhado para troubleshooting
-
-### Persistência de Pedidos
-
-- Pedidos nunca são perdidos
-- Estados intermediários salvos no banco
-- Possibilidade de retry manual via API
-
-## Estrutura do Projeto
-
-```
-resale-api/
-├── Controllers/         # Controladores da API
-├── Data/               # Contexto do Entity Framework
-├── DTOs/               # Data Transfer Objects
-├── Models/             # Modelos de domínio
-├── Repositories/       # Padrão Repository
-├── Services/           # Lógica de negócio
-├── Migrations/         # Migrations do EF Core
-└── Properties/         # Configurações de launch
-```
-
-## Observabilidade
-
-### Logging
-
-- **Structured Logging** com Serilog
-- **Log Levels** configuráveis por ambiente
-- **Correlation IDs** para rastreamento de requisições
-
-### Métricas
-
-- Contadores de pedidos criados/enviados
-- Tempos de resposta da API Brewery
-- Taxa de sucesso/falha dos envios
-
-### Health Checks
-
-- Disponibilidade do banco de dados
-- Conectividade com API Brewery
-- Status dos serviços críticos
-
-## Segurança
-
-### Validações
-
-- Input validation em todos os endpoints
-- Sanitização de dados de entrada
-- Rate limiting configurável
-
-### Dados Sensíveis
-
-- Logs não incluem dados pessoais
-- Connection strings criptografadas em produção
-- Tokens de API seguros
-
-## Testes
-
-### Testes Unitários
-
-```bash
-dotnet test
-```
-
-### Testes de Integração
-
-- Testes com banco em memória
-- Mock da API Brewery
-- Cenários de retry e falha
-
-## Deploy
-
-### Ambiente de Produção
-
-1. Configure as variáveis de ambiente:
-
-   - `ConnectionStrings__DefaultConnection`
-   - `BreweryApi__BaseUrl`
-
-- `BreweryApi__UseMockService=false`
-
-2. Execute as migrations:
-
-```bash
-dotnet ef database update --environment Production
-```
-
-3. Publique a aplicação:
-
-```bash
-dotnet publish -c Release
-```
-
-## Monitoring em Produção
-
-- **Application Insights** para telemetria
-- **Health Checks** endpoint: `/health`
-- **Prometheus** metrics: `/metrics`
-- **Swagger** desabilitado em produção
-
-## Contato
-
-Para dúvidas ou suporte, entre em contato com a equipe de desenvolvimento.
+These rules are automatically validated during Create and Update operations.
